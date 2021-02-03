@@ -29,9 +29,13 @@ public class SerialController : MonoBehaviour
 {
 
     [SerializeField]float movimento = 1000f;
+    [SerializeField]float deslocamentoMinimo = 1f;
     Rigidbody rigidBody;
     bool seringaDentro = false;
-    //Vector3 posicao;
+    Vector3 posicao;
+    float diferenca, acumulado;
+    bool novaPosicao = true;
+    
 
 
     [Tooltip("Port name with which the SerialPort object will be created.")]
@@ -122,20 +126,26 @@ public class SerialController : MonoBehaviour
     void Update()
     {
 
-         //posicao = rigidBody.position;                                      //modela a movimentacao
+         //posicao = transform.position; 
+         //print(posicao);                                     //modela a movimentacao
 
         RespondtoCommands();
-        /*
+        
         if(seringaDentro){
-            //print(rigidBody.velocity);
-            //if(rigidBody.velocity != Vector3.zero){
-            //if(rigidBody.position != posicao){
-                print("check 1");
-                SendSerialMessage("2");
-
-            }
+            if(novaPosicao)
+                StartCoroutine(ColisaoCoroutine());
+            //diferenca = transform.position.z - posicao.z;
+           // acumulado = acumulado + (diferenca/Time.deltaTime);
+            //print(acumulado);
+            //print(diferenca/Time.deltaTime);
+            //if(Mathf.Abs(diferenca) > deslocamentoMinimo){
+            //if(Calculadiferenca(transform.position,posicao,deslocamentoMinimo))
+            //if(!(transform.position == posicao))
+            //if(acumulado > deslocamentoMinimo){
+            //SendSerialMessage("2");
+           // }
         }
-        */
+        
         // If the user prefers to poll the messages instead of receiving them
         // via SendMessage, then the message listener should be null.
         if (messageListener == null)
@@ -162,12 +172,14 @@ public class SerialController : MonoBehaviour
     private void RespondtoCommands(){  
         float movimentoNesseFrame = movimento * Time.deltaTime;
         if(Input.GetKey(KeyCode.A))
-            rigidBody.AddRelativeForce(Vector3.back * movimentoNesseFrame);
+            this.transform.Translate(Vector3.back * movimentoNesseFrame);
+            //rigidBody.AddRelativeForce(Vector3.back * movimentoNesseFrame);
         
         if(Input.GetKey(KeyCode.D))
-            rigidBody.AddRelativeForce(Vector3.forward * movimentoNesseFrame);
+            this.transform.Translate(Vector3.forward * movimentoNesseFrame);
+            //rigidBody.AddRelativeForce(Vector3.forward * movimentoNesseFrame);
         
-        rigidBody.velocity = Vector3.zero;
+        //rigidBody.velocity = Vector3.zero;
     }
 
     void OnTriggerEnter(Collider collider){                                  //detecta a insercao da seringa
@@ -179,15 +191,32 @@ public class SerialController : MonoBehaviour
             SendSerialMessage("3");
             seringaDentro = false;
     }     
-
-
+/*
     void OnTriggerStay(Collider collider){                                 //detecta o movimento da seringa no interior da cabeca
-        if(rigidBody.velocity != Vector3.zero){                            //desse jeito nao funciona porque com um unico movimento deda seringa entrar e sair 
+        //if(rigidBody.velocity != Vector3.zero){                            //desse jeito nao funciona porque com um unico movimento deda seringa entrar e sair 
+            //if(collider.gameObject.Comparetag("seringa")){           
             SendSerialMessage("2");                                        //essa funcao eh chamada 20x ou mais e fica atrasando o desenrolar do programa
             print("ta mexendo");
-        }
+        //}
     }
+*/
 
+    IEnumerator ColisaoCoroutine(){
+        posicao = transform.position;
+        //print(posicao.z);
+        novaPosicao = false;
+        //Debug.Log("entrou agr co rotina");
+        yield return new WaitForSeconds(0.4f);
+        diferenca = transform.position.x - posicao.x;
+        //print(diferenca);
+       // Debug.Log("2 segundos depois");
+        //print(posicao);
+        //print(transform.position);
+        novaPosicao = true;
+        print(diferenca*100);
+        if(Mathf.Abs(diferenca*100) > deslocamentoMinimo)
+            SendSerialMessage("2");
+    }
 
 
 
@@ -223,3 +252,19 @@ public class SerialController : MonoBehaviour
     }
 
 }
+
+
+
+
+    /*
+    public bool Calculadiferenca(Vector3 atual, Vector3 anterior, float deslocamentoMinimo){
+        //var dx = me.x - other.x;
+        //if (Mathf.Abs(dx) > allowedDifference)
+        //    return false;
+        //var dy = me.y - other.y;
+        //if (Mathf.Abs(dy) > allowedDifference)
+        //    return false;
+        var dz = atual.z - anterior.z;
+        return Mathf.Abs(dz) >= deslocamentoMinimo;
+    }
+    */
