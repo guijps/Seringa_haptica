@@ -28,13 +28,12 @@ using System.Collections.Generic;
 public class SerialController : MonoBehaviour
 {
 
-    [SerializeField]float movimento = 1000f;
-    [SerializeField]float deslocamentoMinimo = 1f;
-    Rigidbody rigidBody;
+    [SerializeField]float movimento = 1000f;                //velocidade da seringa 
+    [SerializeField]float deslocamentoMinimo = 1f;          //determina deslocamento minimo para ativacao do vibracall quando a seringa esta inserida
     bool seringaDentro = false;
     Vector3 posicao;
-    float diferenca, acumulado;
-    bool novaPosicao = true;
+    float diferenca;
+    bool novaPosicao = true;                                //evita que a co-rotina seja chamada indiscriminadamente
     
 
 
@@ -76,7 +75,7 @@ public class SerialController : MonoBehaviour
     // ------------------------------------------------------------------------
     void Start()
     {
-        rigidBody = GetComponent<Rigidbody>();
+
     }
 
     void OnEnable()
@@ -125,25 +124,11 @@ public class SerialController : MonoBehaviour
     // ------------------------------------------------------------------------
     void Update()
     {
-
-         //posicao = transform.position; 
-         //print(posicao);                                     //modela a movimentacao
-
         RespondtoCommands();
         
         if(seringaDentro){
             if(novaPosicao)
                 StartCoroutine(ColisaoCoroutine());
-            //diferenca = transform.position.z - posicao.z;
-           // acumulado = acumulado + (diferenca/Time.deltaTime);
-            //print(acumulado);
-            //print(diferenca/Time.deltaTime);
-            //if(Mathf.Abs(diferenca) > deslocamentoMinimo){
-            //if(Calculadiferenca(transform.position,posicao,deslocamentoMinimo))
-            //if(!(transform.position == posicao))
-            //if(acumulado > deslocamentoMinimo){
-            //SendSerialMessage("2");
-           // }
         }
         
         // If the user prefers to poll the messages instead of receiving them
@@ -166,20 +151,12 @@ public class SerialController : MonoBehaviour
     }
 
 
-
-
-
-    private void RespondtoCommands(){  
+    private void RespondtoCommands(){                                 //modela o movimento
         float movimentoNesseFrame = movimento * Time.deltaTime;
         if(Input.GetKey(KeyCode.A))
             this.transform.Translate(Vector3.back * movimentoNesseFrame);
-            //rigidBody.AddRelativeForce(Vector3.back * movimentoNesseFrame);
-        
         if(Input.GetKey(KeyCode.D))
             this.transform.Translate(Vector3.forward * movimentoNesseFrame);
-            //rigidBody.AddRelativeForce(Vector3.forward * movimentoNesseFrame);
-        
-        //rigidBody.velocity = Vector3.zero;
     }
 
     void OnTriggerEnter(Collider collider){                                  //detecta a insercao da seringa
@@ -191,30 +168,16 @@ public class SerialController : MonoBehaviour
             SendSerialMessage("3");
             seringaDentro = false;
     }     
-/*
-    void OnTriggerStay(Collider collider){                                 //detecta o movimento da seringa no interior da cabeca
-        //if(rigidBody.velocity != Vector3.zero){                            //desse jeito nao funciona porque com um unico movimento deda seringa entrar e sair 
-            //if(collider.gameObject.Comparetag("seringa")){           
-            SendSerialMessage("2");                                        //essa funcao eh chamada 20x ou mais e fica atrasando o desenrolar do programa
-            print("ta mexendo");
-        //}
-    }
-*/
 
     IEnumerator ColisaoCoroutine(){
-        posicao = transform.position;
-        //print(posicao.z);
+        posicao = transform.position;                       //salva a posicao da seringa antes da pausa
         novaPosicao = false;
-        //Debug.Log("entrou agr co rotina");
-        yield return new WaitForSeconds(0.4f);
+
+        yield return new WaitForSeconds(0.4f);              //pausa para captar diferenca do posicionamento da seringa e desacelerar as chamas da funcao
+        
         diferenca = transform.position.x - posicao.x;
-        //print(diferenca);
-       // Debug.Log("2 segundos depois");
-        //print(posicao);
-        //print(transform.position);
         novaPosicao = true;
-        print(diferenca*100);
-        if(Mathf.Abs(diferenca*100) > deslocamentoMinimo)
+        if(Mathf.Abs(diferenca*100) > deslocamentoMinimo)   //modela a diferenca minima de distancia, pode ser ajustada no fator ou no SerialField
             SendSerialMessage("2");
     }
 
@@ -252,19 +215,3 @@ public class SerialController : MonoBehaviour
     }
 
 }
-
-
-
-
-    /*
-    public bool Calculadiferenca(Vector3 atual, Vector3 anterior, float deslocamentoMinimo){
-        //var dx = me.x - other.x;
-        //if (Mathf.Abs(dx) > allowedDifference)
-        //    return false;
-        //var dy = me.y - other.y;
-        //if (Mathf.Abs(dy) > allowedDifference)
-        //    return false;
-        var dz = atual.z - anterior.z;
-        return Mathf.Abs(dz) >= deslocamentoMinimo;
-    }
-    */
