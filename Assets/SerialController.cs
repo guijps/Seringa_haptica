@@ -173,7 +173,7 @@ public class SerialController : MonoBehaviour
         posicao = transform.position;                       //salva a posicao da seringa antes da pausa
         novaPosicao = false;
 
-        yield return new WaitForSeconds(0.4f);              //pausa para captar diferenca do posicionamento da seringa e desacelerar as chamas da funcao
+        yield return new WaitForSeconds(0.45f);              //pausa para captar diferenca do posicionamento da seringa e desacelerar as chamas da funcao
         
         diferenca = transform.position.x - posicao.x;
         novaPosicao = true;

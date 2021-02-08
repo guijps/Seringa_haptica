@@ -6,6 +6,7 @@ TagManager:
   tags:
   - cabeca
   - Embolo
+  - seringa
   layers:
   - Default
   - TransparentFX

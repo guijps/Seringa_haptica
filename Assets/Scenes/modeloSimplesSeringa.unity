@@ -180,7 +180,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6401e5850a983d84ea358c8a27851496, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movimento: 2000
+  movimento: 1
+  deslocamentoMinimo: 1
   portName: COM4
   baudRate: 9600
   messageListener: {fileID: 26616661}
@@ -354,8 +355,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 858558121}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.15, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.55, y: 0, z: 0}
+  m_LocalScale: {x: 1.4507, y: 1.4507, z: 1.4507}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -494,6 +495,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: carpule_separado
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: 06d2d15cba88d804199aee333f1c169f,
+        type: 3}
+      propertyPath: m_TagString
+      value: seringa
       objectReference: {fileID: 0}
     - target: {fileID: -6236743471014415788, guid: 06d2d15cba88d804199aee333f1c169f,
         type: 3}
