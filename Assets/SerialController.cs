@@ -36,6 +36,8 @@ public class SerialController : MonoBehaviour
     bool novaPosicao = true;                                //evita que a co-rotina seja chamada indiscriminadamente
     
 
+    float ultimaPosicao;
+
 
     [Tooltip("Port name with which the SerialPort object will be created.")]
     public string portName = "COM3";
@@ -125,10 +127,19 @@ public class SerialController : MonoBehaviour
     void Update()
     {
         RespondtoCommands();
-        
+        /*
         if(seringaDentro){
             if(novaPosicao)
                 StartCoroutine(ColisaoCoroutine());
+        }
+        */
+        if(seringaDentro){
+            if((Mathf.Abs(ultimaPosicao - transform.position.magnitude)*100) > deslocamentoMinimo){
+                if(seringaDentro){
+                    SendSerialMessage("2");
+                    ultimaPosicao = transform.position.magnitude;
+                }
+            }
         }
         
         // If the user prefers to poll the messages instead of receiving them
@@ -162,13 +173,14 @@ public class SerialController : MonoBehaviour
     void OnTriggerEnter(Collider collider){                                  //detecta a insercao da seringa
             SendSerialMessage("1");
             seringaDentro = true;
+            ultimaPosicao = transform.position.magnitude;
     }       
 
     void OnTriggerExit(Collider collider){                                  //detecta a retirada da seringa
             SendSerialMessage("3");
             seringaDentro = false;
     }     
-
+/*
     IEnumerator ColisaoCoroutine(){
         posicao = transform.position;                       //salva a posicao da seringa antes da pausa
         novaPosicao = false;
@@ -180,6 +192,7 @@ public class SerialController : MonoBehaviour
         if(Mathf.Abs(diferenca*100) > deslocamentoMinimo)   //modela a diferenca minima de distancia, pode ser ajustada no fator ou no SerialField
             SendSerialMessage("2");
     }
+*/
 
 
 
