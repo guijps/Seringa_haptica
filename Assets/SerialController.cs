@@ -134,9 +134,9 @@ public class SerialController : MonoBehaviour
         }
         */
         if(seringaDentro){
-            if((Mathf.Abs(ultimaPosicao - transform.position.magnitude)*100) > deslocamentoMinimo){
-                if(seringaDentro){
-                    SendSerialMessage("2");
+            if((Mathf.Abs(ultimaPosicao - transform.position.magnitude)*100) > deslocamentoMinimo){             //com a seringa dentro, checa se foi deslocada num valor 
+                if(seringaDentro){                                                                              //razoavel e manda a mensagem
+                    SendSerialMessage("P");
                     ultimaPosicao = transform.position.magnitude;
                 }
             }
@@ -168,16 +168,45 @@ public class SerialController : MonoBehaviour
             this.transform.Translate(Vector3.back * movimentoNesseFrame);
         if(Input.GetKey(KeyCode.D))
             this.transform.Translate(Vector3.forward * movimentoNesseFrame);
+
+    //Bloco feito para simular a configuracao da potencia do vibra do arduino
+        if(Input.GetKey(KeyCode.Alpha0))
+            SendSerialMessage("0");
+        if(Input.GetKey(KeyCode.Alpha1))
+            SendSerialMessage("1");
+        if(Input.GetKey(KeyCode.Alpha2))
+            SendSerialMessage("2");
+        if(Input.GetKey(KeyCode.Alpha3))
+            SendSerialMessage("3");
+        if(Input.GetKey(KeyCode.Alpha4))
+            SendSerialMessage("4");
+        if(Input.GetKey(KeyCode.Alpha5))
+            SendSerialMessage("5");
+        if(Input.GetKey(KeyCode.Alpha6))
+            SendSerialMessage("6");
+        if(Input.GetKey(KeyCode.Alpha7))
+            SendSerialMessage("7");
+        if(Input.GetKey(KeyCode.Alpha8))
+            SendSerialMessage("8");
+        if(Input.GetKey(KeyCode.Alpha9))
+            SendSerialMessage("9");
+    
+        if(Input.GetKeyDown(KeyCode.Q))
+            SendSerialMessage("L");
+        if(Input.GetKeyDown(KeyCode.W))
+            SendSerialMessage("D");
+
+
     }
 
     void OnTriggerEnter(Collider collider){                                  //detecta a insercao da seringa
-            SendSerialMessage("1");
+            SendSerialMessage("P");
             seringaDentro = true;
             ultimaPosicao = transform.position.magnitude;
     }       
 
     void OnTriggerExit(Collider collider){                                  //detecta a retirada da seringa
-            SendSerialMessage("3");
+            SendSerialMessage("P");
             seringaDentro = false;
     }     
 /*
