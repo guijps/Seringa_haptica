@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Ardity (Serial Communication for Arduino + Unity)
  * Author: Daniel Wilches <dwilches@gmail.com>
  *
@@ -7,9 +7,17 @@
  */
 
 using UnityEngine;
+using UnityEngine.UI;
+using System;
 using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO.Ports;
+using System.IO;
+using System.Management;
+
+
+
 
 /**
  * This class allows a Unity program to continually check for messages from a
@@ -31,9 +39,11 @@ public class SerialController : MonoBehaviour
     [SerializeField]float movimento = 1000f;                //velocidade da seringa 
     [SerializeField]float deslocamentoMinimo = 1f;          //determina deslocamento minimo para ativacao do vibracall quando a seringa esta inserida
     bool seringaDentro = false;
+    bool isConnect = false;
+    bool portaAberta = false;
     Vector3 posicao;
     float diferenca;
-    bool novaPosicao = true;                                //evita que a co-rotina seja chamada indiscriminadamente
+    //bool novaPosicao = true;                                //evita que a co-rotina seja chamada indiscriminadamente
     
 
     float ultimaPosicao;
@@ -41,6 +51,8 @@ public class SerialController : MonoBehaviour
 
     [Tooltip("Port name with which the SerialPort object will be created.")]
     public string portName = "COM3";
+    string[] portNames = SerialPort.GetPortNames(); 
+    string[] portNamess = {"COM1","COM2","COM3","COM4","COM5"};
 
     [Tooltip("Baud rate that the serial device is using to transmit data.")]
     public int baudRate = 9600;
@@ -77,17 +89,51 @@ public class SerialController : MonoBehaviour
     // ------------------------------------------------------------------------
     void Start()
     {
+        
 
     }
 
     void OnEnable()
     {
-        serialThread = new SerialThreadLines(portName, 
-                                             baudRate, 
-                                             reconnectionDelay,
-                                             maxUnreadMessages);
-        thread = new Thread(new ThreadStart(serialThread.RunForever));
-        thread.Start();
+ 
+        try
+        {
+             
+            foreach(string port in portNames){
+                Debug.Log("parada 1");
+                var serialPort = new SerialPort(port, 9600, 0, 8, StopBits.One);
+                serialPort.ReadTimeout = 200;
+                Debug.Log("parada 2");
+                //Debug.Log(port);
+                serialPort.Open();
+                Debug.Log("parada 3");
+                //Debug.Log(serialPort.IsOpen);
+                //serialPort.WriteLine("aaaaaaaaaaaaaaaaaa");
+                serialPort.Write("a");
+                serialPort.WriteLine("a");
+                //if(serialPort.ReadLine() == "A"){
+                string lida = serialPort.ReadTo("A");   
+                //if(serialPort.ReadExisting().Contains("A")){
+                    Debug.Log(lida);
+                    Debug.Log("parada 1");
+                    portaAberta = true;
+                    portName = port;
+                    Debug.Log(portName);
+                    serialPort.Close();
+                    //break;
+                //}
+            }
+        }
+        catch (TimeoutException e) { 
+            Debug.Log("Deu ruim");
+            //throw;
+        }
+        catch (System.Exception)
+        {
+            Debug.Log("Deu ruim");
+            //throw;
+        }
+        
     }
 
     // ------------------------------------------------------------------------
@@ -126,13 +172,25 @@ public class SerialController : MonoBehaviour
     // ------------------------------------------------------------------------
     void Update()
     {
+                
+        RespondtoMovementCommands();
+    
+    if(portaAberta){
+        Debug.Log("parada 5");
+        serialThread = new SerialThreadLines(portName, 
+                                             baudRate, 
+                                             reconnectionDelay,
+                                             maxUnreadMessages);
+        thread = new Thread(new ThreadStart(serialThread.RunForever));
+        thread.Start();
+        portaAberta = false;
+        isConnect = true;
+    }
+
+    if(portaAberta || isConnect){
         RespondtoCommands();
-        /*
-        if(seringaDentro){
-            if(novaPosicao)
-                StartCoroutine(ColisaoCoroutine());
-        }
-        */
+        
+        
         if(seringaDentro){
             if((Mathf.Abs(ultimaPosicao - transform.position.magnitude)*100) > deslocamentoMinimo){             //com a seringa dentro, checa se foi deslocada num valor 
                 if(seringaDentro){                                                                              //razoavel e manda a mensagem
@@ -160,37 +218,60 @@ public class SerialController : MonoBehaviour
         else
             messageListener.SendMessage("OnMessageArrived", message);
     }
+/*
+        if(!isConnect){
+           
+                foreach(string port in portNames){
+                    portName = port;
+                    //Debug.Log(portName);
+                    SendSerialMessage("a");
+                    //Debug.Log(isConnect);
+                    //Debug.Log(message);
+                    if(message == "A"){
+                       isConnect = true;
+                        break;
+                    }
+                }
+           
+        } */
+        
+    }
 
 
-    private void RespondtoCommands(){                                 //modela o movimento
+    private void RespondtoMovementCommands(){                                 //modela o movimento
         float movimentoNesseFrame = movimento * Time.deltaTime;
         if(Input.GetKey(KeyCode.A))
             this.transform.Translate(Vector3.back * movimentoNesseFrame);
         if(Input.GetKey(KeyCode.D))
             this.transform.Translate(Vector3.forward * movimentoNesseFrame);
+    }
 
-    //Bloco feito para simular a configuracao da potencia do vibra do arduino
-        if(Input.GetKey(KeyCode.Alpha0))
+
+    //Bloco feito para configurar a potencia do vibra do arduino (niveis de 0 a 9)
+    private void RespondtoCommands(){
+        if(Input.GetKeyDown(KeyCode.Alpha0))
             SendSerialMessage("0");
-        if(Input.GetKey(KeyCode.Alpha1))
+        if(Input.GetKeyDown(KeyCode.Alpha1))
             SendSerialMessage("1");
-        if(Input.GetKey(KeyCode.Alpha2))
+        if(Input.GetKeyDown(KeyCode.Alpha2))
             SendSerialMessage("2");
-        if(Input.GetKey(KeyCode.Alpha3))
+        if(Input.GetKeyDown(KeyCode.Alpha3))
             SendSerialMessage("3");
-        if(Input.GetKey(KeyCode.Alpha4))
+        if(Input.GetKeyDown(KeyCode.Alpha4))
             SendSerialMessage("4");
-        if(Input.GetKey(KeyCode.Alpha5))
+        if(Input.GetKeyDown(KeyCode.Alpha5))
             SendSerialMessage("5");
-        if(Input.GetKey(KeyCode.Alpha6))
+        if(Input.GetKeyDown(KeyCode.Alpha6))
             SendSerialMessage("6");
-        if(Input.GetKey(KeyCode.Alpha7))
+        if(Input.GetKeyDown(KeyCode.Alpha7))
             SendSerialMessage("7");
-        if(Input.GetKey(KeyCode.Alpha8))
+        if(Input.GetKeyDown(KeyCode.Alpha8))
             SendSerialMessage("8");
-        if(Input.GetKey(KeyCode.Alpha9))
+        if(Input.GetKeyDown(KeyCode.Alpha9))
             SendSerialMessage("9");
     
+
+    //Bloco feito para simular o uso da vibracao continua do vibra (a principio nao utilizado no vibra)
         if(Input.GetKeyDown(KeyCode.Q))
             SendSerialMessage("L");
         if(Input.GetKeyDown(KeyCode.W))
@@ -209,19 +290,11 @@ public class SerialController : MonoBehaviour
             SendSerialMessage("P");
             seringaDentro = false;
     }     
-/*
-    IEnumerator ColisaoCoroutine(){
-        posicao = transform.position;                       //salva a posicao da seringa antes da pausa
-        novaPosicao = false;
 
-        yield return new WaitForSeconds(0.45f);              //pausa para captar diferenca do posicionamento da seringa e desacelerar as chamas da funcao
-        
-        diferenca = transform.position.x - posicao.x;
-        novaPosicao = true;
-        if(Mathf.Abs(diferenca*100) > deslocamentoMinimo)   //modela a diferenca minima de distancia, pode ser ajustada no fator ou no SerialField
-            SendSerialMessage("2");
-    }
-*/
+
+    
+
+
 
 
 
@@ -257,3 +330,27 @@ public class SerialController : MonoBehaviour
     }
 
 }
+
+
+
+
+/*
+        if(seringaDentro){
+            if(novaPosicao)
+                StartCoroutine(ColisaoCoroutine());
+        }
+        */
+
+/*
+    IEnumerator ColisaoCoroutine(){
+        posicao = transform.position;                       //salva a posicao da seringa antes da pausa
+        novaPosicao = false;
+
+        yield return new WaitForSeconds(0.45f);              //pausa para captar diferenca do posicionamento da seringa e desacelerar as chamas da funcao
+        
+        diferenca = transform.position.x - posicao.x;
+        novaPosicao = true;
+        if(Mathf.Abs(diferenca*100) > deslocamentoMinimo)   //modela a diferenca minima de distancia, pode ser ajustada no fator ou no SerialField
+            SendSerialMessage("2");
+    }
+*/

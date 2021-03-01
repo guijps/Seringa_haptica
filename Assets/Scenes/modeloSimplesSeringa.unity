@@ -182,7 +182,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movimento: 0.1
   deslocamentoMinimo: 2
-  portName: COM4
+  portName: COM1
   baudRate: 9600
   messageListener: {fileID: 26616661}
   reconnectionDelay: 1000
@@ -264,7 +264,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 364424602}
   m_LocalRotation: {x: -0, y: -0.08727355, z: -0, w: 0.9961844}
-  m_LocalPosition: {x: 0.732, y: -0.03, z: -0.376}
+  m_LocalPosition: {x: 0.732, y: -0.03, z: -0.373}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
