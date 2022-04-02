@@ -44,15 +44,23 @@ public class SerialController : MonoBehaviour
     Vector3 posicao;
     float diferenca;
     //bool novaPosicao = true;                                //evita que a co-rotina seja chamada indiscriminadamente
+   
+    
+    Vector3 positionInput;
+    //public Transform camPivot;
+    //float heading = 0;
+    //public Transform cam;
+    float velocidadeMouse = 180f;
     
 
-    float ultimaPosicao;
+    //float ultimaPosicao;
+    Vector3 ultimaPosicao;
 
 
     [Tooltip("Port name with which the SerialPort object will be created.")]
-    public string portName = "COM3";
+    public string portName = "COM6";
     string[] portNames = SerialPort.GetPortNames(); 
-    string[] portNamess = {"COM1","COM2","COM3","COM4","COM5"};
+    //string[] portNamess = {"COM1","COM2","COM3","COM4","COM5"};
 
     [Tooltip("Baud rate that the serial device is using to transmit data.")]
     public int baudRate = 9600;
@@ -95,45 +103,38 @@ public class SerialController : MonoBehaviour
 
     void OnEnable()
     {
- 
         try
         {
-             
-            foreach(string port in portNames){
-                Debug.Log("parada 1");
-                var serialPort = new SerialPort(port, 9600, 0, 8, StopBits.One);
-                serialPort.ReadTimeout = 200;
-                Debug.Log("parada 2");
-                //Debug.Log(port);
+           //foreach(string port in portNames){  
+            var serialPort = new SerialPort(portName, 9600, 0, 8, StopBits.One);
+                Debug.Log("i");
+                serialPort.ReadTimeout = 100;
+                Debug.Log("i");
+                Thread.Sleep(200);
                 serialPort.Open();
-                Debug.Log("parada 3");
-                //Debug.Log(serialPort.IsOpen);
-                //serialPort.WriteLine("aaaaaaaaaaaaaaaaaa");
-                serialPort.Write("a");
+                Thread.Sleep(200);
+                Debug.Log("i");
+                serialPort.Write("b");
+                Debug.Log("i");
                 serialPort.WriteLine("a");
-                //if(serialPort.ReadLine() == "A"){
-                string lida = serialPort.ReadTo("A");   
-                //if(serialPort.ReadExisting().Contains("A")){
-                    Debug.Log(lida);
-                    Debug.Log("parada 1");
-                    portaAberta = true;
-                    portName = port;
-                    Debug.Log(portName);
-                    serialPort.Close();
-                    //break;
-                //}
-            }
+                Debug.Log("i");
+                serialPort.ReadTo("A");
+                Debug.Log("i");
+                portaAberta = true;
+                portName = portName;
+                serialPort.Close();
+            //}
         }
         catch (TimeoutException e) { 
             Debug.Log("Deu ruim");
-            //throw;
-        }
-        catch (System.Exception)
-        {
-            Debug.Log("Deu ruim");
-            //throw;
-        }
+            Debug.Log(e.ToString());
         
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log("Deu ruim?" );
+            Debug.Log(e.ToString());
+        }  
     }
 
     // ------------------------------------------------------------------------
@@ -172,11 +173,12 @@ public class SerialController : MonoBehaviour
     // ------------------------------------------------------------------------
     void Update()
     {
-                
-        RespondtoMovementCommands();
+       // RespondtoMovementCommands();
+        MovementInputs();
+
+
     
     if(portaAberta){
-        Debug.Log("parada 5");
         serialThread = new SerialThreadLines(portName, 
                                              baudRate, 
                                              reconnectionDelay,
@@ -192,10 +194,13 @@ public class SerialController : MonoBehaviour
         
         
         if(seringaDentro){
-            if((Mathf.Abs(ultimaPosicao - transform.position.magnitude)*100) > deslocamentoMinimo){             //com a seringa dentro, checa se foi deslocada num valor 
+            //if((Mathf.Abs(ultimaPosicao - transform.position.magnitude)*100) > deslocamentoMinimo){             //com a seringa dentro, checa se foi deslocada num valor 
+            
+            if((Mathf.Abs((ultimaPosicao - transform.position).magnitude)*100) > deslocamentoMinimo){             //com a seringa dentro, checa se foi deslocada num valor 
                 if(seringaDentro){                                                                              //razoavel e manda a mensagem
                     SendSerialMessage("P");
-                    ultimaPosicao = transform.position.magnitude;
+                    //ultimaPosicao = transform.position.magnitude;
+                    ultimaPosicao = transform.position;
                 }
             }
         }
@@ -237,7 +242,27 @@ public class SerialController : MonoBehaviour
         
     }
 
+    private void MovementInputs(){
+       // heading += Input.GetAxis("Mouse X")*Time.deltaTime*velocidadeMouse;
+        //camPivot.rotation = Quaternion.Euler(0, heading, 0);
 
+        
+        positionInput = new Vector3(Input.GetAxis("Horizontal"),Input.GetAxis("Vertical"),Input.GetAxis("Mouse ScrollWheel"));
+        positionInput = Vector3.ClampMagnitude(positionInput, 1);
+
+        //Vector3 camF = cam.forward;
+        //Vector3 camR = cam.right;
+
+        //camF = camF.normalized;
+        //camR = camR.normalized;
+
+        transform.position += new Vector3(positionInput.x, positionInput.y, positionInput.z*30)*Time.deltaTime*movimento;
+        //transform.position += (camF*positionInput.y + camR*positionInput.x)*Time.deltaTime;
+    }
+
+
+
+/*
     private void RespondtoMovementCommands(){                                 //modela o movimento
         float movimentoNesseFrame = movimento * Time.deltaTime;
         if(Input.GetKey(KeyCode.A))
@@ -245,50 +270,59 @@ public class SerialController : MonoBehaviour
         if(Input.GetKey(KeyCode.D))
             this.transform.Translate(Vector3.forward * movimentoNesseFrame);
     }
-
+*/
 
     //Bloco feito para configurar a potencia do vibra do arduino (niveis de 0 a 9)
     private void RespondtoCommands(){
-        if(Input.GetKeyDown(KeyCode.Alpha0))
-            SendSerialMessage("0");
-        if(Input.GetKeyDown(KeyCode.Alpha1))
-            SendSerialMessage("1");
-        if(Input.GetKeyDown(KeyCode.Alpha2))
-            SendSerialMessage("2");
-        if(Input.GetKeyDown(KeyCode.Alpha3))
-            SendSerialMessage("3");
-        if(Input.GetKeyDown(KeyCode.Alpha4))
-            SendSerialMessage("4");
-        if(Input.GetKeyDown(KeyCode.Alpha5))
-            SendSerialMessage("5");
-        if(Input.GetKeyDown(KeyCode.Alpha6))
-            SendSerialMessage("6");
-        if(Input.GetKeyDown(KeyCode.Alpha7))
-            SendSerialMessage("7");
-        if(Input.GetKeyDown(KeyCode.Alpha8))
-            SendSerialMessage("8");
-        if(Input.GetKeyDown(KeyCode.Alpha9))
-            SendSerialMessage("9");
-    
+        if(isConnect){
+            if(Input.GetKeyDown(KeyCode.Alpha0))
+                SendSerialMessage("0");
+            if(Input.GetKeyDown(KeyCode.Alpha1))
+                SendSerialMessage("1");
+            if(Input.GetKeyDown(KeyCode.Alpha2))
+                SendSerialMessage("2");
+            if(Input.GetKeyDown(KeyCode.Alpha3))
+                SendSerialMessage("3");
+            if(Input.GetKeyDown(KeyCode.Alpha4))
+                SendSerialMessage("4");
+            if(Input.GetKeyDown(KeyCode.Alpha5))
+                SendSerialMessage("5");
+            if(Input.GetKeyDown(KeyCode.Alpha6))
+                SendSerialMessage("6");
+            if(Input.GetKeyDown(KeyCode.Alpha7))
+                SendSerialMessage("7");
+            if(Input.GetKeyDown(KeyCode.Alpha8))
+                SendSerialMessage("8");
+            if(Input.GetKeyDown(KeyCode.Alpha9))
+                SendSerialMessage("9");
+        
 
     //Bloco feito para simular o uso da vibracao continua do vibra (a principio nao utilizado no vibra)
-        if(Input.GetKeyDown(KeyCode.Q))
-            SendSerialMessage("L");
-        if(Input.GetKeyDown(KeyCode.W))
-            SendSerialMessage("D");
-
+            if(Input.GetKeyDown(KeyCode.Q))
+                SendSerialMessage("L");
+            if(Input.GetKeyDown(KeyCode.E))
+                SendSerialMessage("D");
+        }
 
     }
 
     void OnTriggerEnter(Collider collider){                                  //detecta a insercao da seringa
+        try{
             SendSerialMessage("P");
             seringaDentro = true;
-            ultimaPosicao = transform.position.magnitude;
+            //ultimaPosicao = transform.position.magnitude;
+            ultimaPosicao = transform.position;
+        }
+        catch(System.Exception){}
+
     }       
 
     void OnTriggerExit(Collider collider){                                  //detecta a retirada da seringa
+        try{
             SendSerialMessage("P");
             seringaDentro = false;
+        }
+        catch(System.Exception){}
     }     
 
 
