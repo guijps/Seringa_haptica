@@ -15,9 +15,7 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.IO;
 using System.Management;
-
-
-
+using System.Linq;
 
 /**
  * This class allows a Unity program to continually check for messages from a
@@ -44,8 +42,9 @@ public class SerialController : MonoBehaviour
     Vector3 posicao;
     float diferenca;
     //bool novaPosicao = true;                                //evita que a co-rotina seja chamada indiscriminadamente
-   
-    
+    SerialPort port;
+
+
     Vector3 positionInput;
     //public Transform camPivot;
     //float heading = 0;
@@ -55,11 +54,11 @@ public class SerialController : MonoBehaviour
 
     //float ultimaPosicao;
     Vector3 ultimaPosicao;
+    public string indx;
 
-
-    [Tooltip("Port name with which the SerialPort object will be created.")]
-    public string portName = "COM6";
-    string[] portNames = SerialPort.GetPortNames(); 
+   [Tooltip("Port name with which the SerialPort object will be created.")]
+    public string portName ;
+    public string[] portNames;
     //string[] portNamess = {"COM1","COM2","COM3","COM4","COM5"};
 
     [Tooltip("Baud rate that the serial device is using to transmit data.")]
@@ -88,7 +87,8 @@ public class SerialController : MonoBehaviour
     // Internal reference to the Thread and the object that runs in it.
     protected Thread thread;
     protected SerialThreadLines serialThread;
-
+    public string[] strings;
+    public string name;
 
     // ------------------------------------------------------------------------
     // Invoked whenever the SerialController gameobject is activated.
@@ -100,41 +100,88 @@ public class SerialController : MonoBehaviour
         
 
     }
-
-    void OnEnable()
+    public List<string> getPort()
     {
+
+        List<string> portElegiveis = new List<string>();
         try
         {
-           //foreach(string port in portNames){  
-            var serialPort = new SerialPort(portName, 9600, 0, 8, StopBits.One);
-                Debug.Log("i");
-                serialPort.ReadTimeout = 100;
-                Debug.Log("i");
-                Thread.Sleep(200);
-                serialPort.Open();
-                Thread.Sleep(200);
-                Debug.Log("i");
-                serialPort.Write("b");
-                Debug.Log("i");
-                serialPort.WriteLine("a");
-                Debug.Log("i");
-                serialPort.ReadTo("A");
-                Debug.Log("i");
-                portaAberta = true;
-                portName = portName;
-                serialPort.Close();
-            //}
+             strings = SerialPort.GetPortNames();
         }
-        catch (TimeoutException e) { 
-            Debug.Log("Deu ruim");
-            Debug.Log(e.ToString());
-        
-        }
-        catch (System.Exception e)
+        catch(Exception e)
         {
-            Debug.Log("Deu ruim?" );
-            Debug.Log(e.ToString());
-        }  
+            return null;
+        }   
+       
+        if (strings.Length == 0)
+        {
+            return portElegiveis;
+        }
+        name = strings[0];
+        
+            SerialPort port = new SerialPort(name, 9600);
+            try
+            {
+                port.Open();
+            }
+            catch(Exception e)
+            {
+                Debug.Log("f");
+                return null;
+            }
+            for (int i = 0; i < 3; i++)
+            {
+                port.WriteLine("a");
+                string portRead = port.ReadLine();
+                char[] chars = portRead.ToArray();
+                if (chars.Contains('b'))
+                {
+                    port.WriteLine("c");
+                    portElegiveis.Add(name);
+                    break;
+                }
+                Debug.Log("indx " + i);
+
+            }
+            port.Close();
+
+        return portElegiveis;
+      
+
+    }
+    void OnEnable()
+    {
+        int a = 0;
+            a = a + 1;
+        a++;
+        strings = SerialPort.GetPortNames();
+        Debug.Log(strings[0]);
+        port = new SerialPort(strings[0], 9600);
+        port.Open();
+
+        port.WriteLine("a");
+        port.WriteLine("a");
+        int aux = port.ReadChar();
+        Debug.Log(aux);
+
+        port.Close();
+        /*
+            portNames = getPort().ToArray();
+                    if (portNames.Length == 1)
+                    {
+
+                        portName = portNames[0];
+                    }
+                    else if(portNames.Length > 1)
+                    {
+                        Debug.Log("Sinc not worked, over 1 lenght");
+
+                    }
+                    else
+                    {
+                        Debug.Log("none Ports");
+                    }*/
+
     }
 
     // ------------------------------------------------------------------------
@@ -358,6 +405,8 @@ public class SerialController : MonoBehaviour
     // ------------------------------------------------------------------------
     public delegate void TearDownFunction();
     private TearDownFunction userDefinedTearDownFunction;
+    public string conectado;
+
     public void SetTearDownFunction(TearDownFunction userFunction)
     {
         this.userDefinedTearDownFunction = userFunction;
