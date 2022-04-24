@@ -151,36 +151,7 @@ public class SerialController : MonoBehaviour
     }
     void OnEnable()
     {
-        int a = 0;
-            a = a + 1;
-        a++;
-        strings = SerialPort.GetPortNames();
-        Debug.Log(strings[0]);
-        port = new SerialPort(strings[0], 9600);
-        port.Open();
-
-        port.WriteLine("a");
-        port.WriteLine("a");
-        int aux = port.ReadChar();
-        Debug.Log(aux);
-
-        port.Close();
-        /*
-            portNames = getPort().ToArray();
-                    if (portNames.Length == 1)
-                    {
-
-                        portName = portNames[0];
-                    }
-                    else if(portNames.Length > 1)
-                    {
-                        Debug.Log("Sinc not worked, over 1 lenght");
-
-                    }
-                    else
-                    {
-                        Debug.Log("none Ports");
-                    }*/
+       
 
     }
 
