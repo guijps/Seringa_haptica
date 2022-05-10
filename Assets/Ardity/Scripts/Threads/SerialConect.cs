@@ -10,7 +10,7 @@ using System.Diagnostics;
 public class SerialConect : MonoBehaviour
 {
     [Tooltip("Port name with which the SerialPort object will be created.")]
-    string portName = "COM6";
+    string portName = "COM4";
     string[] portNames = SerialPort.GetPortNames();
 
 
@@ -27,8 +27,9 @@ public class SerialConect : MonoBehaviour
     public TextMesh messageCalibrateArduino;
     bool b_arduinoCalibration = false;
     bool usingArduino = false;
-
-
+    [SerializeField]
+    float movimento = 0.0001f;
+    Vector3 positionInput;
 
     [Tooltip("Baud rate that the serial device is using to transmit data.")]
     public int baudRate = 9600;
@@ -57,7 +58,7 @@ public class SerialConect : MonoBehaviour
     protected Thread thread;
     protected SerialThreadLines serialThread;
     CultureInfo ci;
-
+ 
     bool turnedOnVibra = false;
     bool turnedOffVibra = false;
     bool onTrigEntered = false;
@@ -104,7 +105,7 @@ public class SerialConect : MonoBehaviour
     {
         if (onTrigEntered == false)
         {
-            UnityEngine.Debug.Log("\n\n\n\n AAAAAAAAAAAAAAAAAAAAAAAA\n\n\n\n");
+            UnityEngine.Debug.Log("Entrei");
             SendSerialMessage("a");
             onTrigEntered = true;
         }
@@ -114,7 +115,7 @@ public class SerialConect : MonoBehaviour
     {
         if (onTrigEntered)
         {
-            UnityEngine.Debug.Log("\n\n\n\n BBBBBBBBBBBBBBBBBBBBB\n\n\n\n");
+            UnityEngine.Debug.Log("Sai");
             SendSerialMessage("b");
             onTrigEntered = false;
         }
@@ -173,12 +174,15 @@ public class SerialConect : MonoBehaviour
     // special messages that mark the start/end of the communication with the
     // device.
     // ------------------------------------------------------------------------
-
+    public void print(string s)
+    {
+        UnityEngine.Debug.Log(s);
+    }
     public KeyCode cima = KeyCode.UpArrow;
     void Update()
     {
-      
-            print("recebido do arduino: " + ReadSerialMessage());
+        MovementInputs();
+          //  print("recebido do arduino: " + ReadSerialMessage());
         
        
         // If the user prefers to poll the messages instead of receiving them
@@ -211,39 +215,14 @@ public class SerialConect : MonoBehaviour
 
 
             }
-        if (Input.GetKeyDown("4"))
-        {
-            
-            SendSerialMessage("4");
-
-
-        }
-        if (Input.GetKeyDown("5"))
-        {
-            print("enviado a mensagem para o arduino: 1");
-
-            SendSerialMessage("5");
-
-        }
-        if (Input.GetKeyDown("6"))
-        {
-
-            SendSerialMessage("6");
-
-        }
-        if (Input.GetKeyDown("9"))
-        {
-            SendSerialMessage("9");
-
-
-        }
-        if (Input.GetKeyDown(KeyCode.A))
+      
+        if (Input.GetKeyDown(KeyCode.Z))
         {
             SendSerialMessage("a");
 
 
         }
-        if (Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKeyDown(KeyCode.X))
         {
             SendSerialMessage("s");
 
@@ -363,7 +342,24 @@ public class SerialConect : MonoBehaviour
                 messageListener.SendMessage("OnMessageArrived", message);*/
         
     }
+    private void MovementInputs()
+    {
+        // heading += Input.GetAxis("Mouse X")*Time.deltaTime*velocidadeMouse;
+        //camPivot.rotation = Quaternion.Euler(0, heading, 0);
 
+
+        positionInput = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), Input.GetAxis("Mouse ScrollWheel"));
+        positionInput = positionInput.normalized;
+
+        //Vector3 camF = cam.forward;
+        //Vector3 camR = cam.right;
+
+        //camF = camF.normalized;
+        //camR = camR.normalized;
+
+        transform.position += new Vector3(positionInput.x, positionInput.y, positionInput.z * 30) * Time.deltaTime * movimento;
+        //transform.position += (camF*positionInput.y + camR*positionInput.x)*Time.deltaTime;
+    }
     // ------------------------------------------------------------------------
     // Returns a new unread message from the serial device. You only need to
     // call this if you don't provide a message listener.

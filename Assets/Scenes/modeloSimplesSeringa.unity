@@ -504,20 +504,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af5e52df86e96a740befb47ea772aec4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!136 &502705118
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 502705115}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.65285933
-  m_Height: 0.19437286
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: -0.82761323}
 --- !u!1 &858558121
 GameObject:
   m_ObjectHideFlags: 0
@@ -1079,6 +1065,7 @@ MonoBehaviour:
   anim_step: 0.1
   distanceEmbolo: 0
   messageCalibrateArduino: {fileID: 0}
+  movimento: 1
   baudRate: 9600
   messageListener: {fileID: 0}
   reconnectionDelay: 1000
@@ -1092,12 +1079,12 @@ CapsuleCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2019713203}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: 0.3913284
-  m_Height: 1
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0.108671606}
+  m_Radius: 0.04663366
+  m_Height: 0.68516743
+  m_Direction: 2
+  m_Center: {x: 0, y: 0, z: 0.15}
 --- !u!54 &2019713206
 Rigidbody:
   m_ObjectHideFlags: 0
