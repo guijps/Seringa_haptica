@@ -10,7 +10,8 @@ using System.Diagnostics;
 public class SerialConect : MonoBehaviour
 {
     [Tooltip("Port name with which the SerialPort object will be created.")]
-    string portName = "COM4";
+    [SerializeField]
+    string portName = "COM6";
     string[] portNames = SerialPort.GetPortNames();
 
 
@@ -19,6 +20,7 @@ public class SerialConect : MonoBehaviour
     string receivedValue = "";
     int portNumTest = 0;
     public bool funcionando = false;
+    [SerializeField]
     GameObject embolo;
     public float totalDistanceEmbolo = 0.5f;
     public float startPositionEmbolo = 0f;
@@ -81,6 +83,7 @@ public class SerialConect : MonoBehaviour
     // ------------------------------------------------------------------------
     private void Awake()
     {
+        portName = "COM6";
         onTrigEntered = false;
         ci = (CultureInfo)CultureInfo.CurrentCulture.Clone();
         ci.NumberFormat.CurrencyDecimalSeparator = ".";
@@ -124,8 +127,8 @@ public class SerialConect : MonoBehaviour
 
     void OnEnable()
     {
-   
-        portName = SerialPort.GetPortNames()[0];
+
+        portName = portName;
 
 
             startTime = Time.time;
@@ -182,7 +185,7 @@ public class SerialConect : MonoBehaviour
     void Update()
     {
         MovementInputs();
-          //  print("recebido do arduino: " + ReadSerialMessage());
+          print("recebido do arduino: " + ReadSerialMessage());
         
        
         // If the user prefers to poll the messages instead of receiving them
@@ -197,15 +200,15 @@ public class SerialConect : MonoBehaviour
             }
             if (Input.GetKeyDown("1"))
             {
-                print("enviado a mensagem para o arduino: 1");
+                print("enviado a mensagem para o arduino: 2");
 
                 SendSerialMessage("1");
 
             }
             if (Input.GetKeyDown("2"))
             {
-               
 
+                print("enviado a mensagem para o arduino: 3");
                 SendSerialMessage("2");
 
             }
@@ -219,13 +222,13 @@ public class SerialConect : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Z))
         {
             SendSerialMessage("a");
-
+            print("a:enviado");
 
         }
         if (Input.GetKeyDown(KeyCode.X))
         {
             SendSerialMessage("s");
-
+            print("z:enviado");
 
         }
 
@@ -276,70 +279,6 @@ public class SerialConect : MonoBehaviour
             }
 
 
-            float positionTarget = 0;
-            if (receivedValue != "" && message != "Seringa calibrada!" && message.Length <= 8)
-            {
-                funcionando = true;
-                if (!turnedOffVibra)
-                {
-                    turnedOffVibra = true;
-                    SendSerialMessage("0");
-                }
-                print(receivedValue);
-                string aux = receivedValue.Split(';')[0];
-                //Grava os batimentos no gameManager para depois ser salvo no arquivo
-                GameManager.batimentos = receivedValue.Split(';')[1];
-                if (aux == "")
-                {
-                    aux = "100";
-                }
-                float dist = float.Parse(aux, NumberStyles.Any, ci);
-                // print(dist);
-                if (dist < 65 && dist > 20)
-                {
-                    if (!turnedOnVibra)
-                    {
-                        turnedOnVibra = true;
-                        // SendSerialMessage("2");
-                    }
-
-
-                }
-                else if (dist < 20)
-                {
-                    // SendSerialMessage("0");
-                }
-                else if (dist > 80)
-                {
-                    turnedOnVibra = false;
-                }
-
-                positionTarget = ((dist / 100)) * totalDistanceEmbolo;
-                GameManager.distancia_embolo_seringa = dist.ToString();
-                if (positionTarget < distanceEmbolo)
-                {
-                    distanceEmbolo -= anim_step;
-                }
-                else
-                {
-                    distanceEmbolo += anim_step;
-                }
-
-            }
-            //print(positionTarget);
-
-            embolo.transform.localPosition = new Vector3(embolo.transform.localPosition.x, embolo.transform.localPosition.y, positionTarget - totalDistanceEmbolo);
-
-            /*if (messageListener == null)
-                return;
-
-            // Check if the message is plain data or a connect/disconnect event.
-            if (ReferenceEquals(message, SERIAL_DEVICE_CONNECTED))
-                messageListener.SendMessage("OnConnectionEvent", true);
-            else if (ReferenceEquals(message, SERIAL_DEVICE_DISCONNECTED))
-                messageListener.SendMessage("OnConnectionEvent", false);
-            else
-                messageListener.SendMessage("OnMessageArrived", message);*/
         
     }
     private void MovementInputs()
@@ -357,7 +296,7 @@ public class SerialConect : MonoBehaviour
         //camF = camF.normalized;
         //camR = camR.normalized;
 
-        transform.position += new Vector3(positionInput.x, positionInput.y, positionInput.z * 30) * Time.deltaTime * movimento;
+        transform.position += new Vector3(positionInput.x, positionInput.y, positionInput.z *3) * Time.deltaTime * movimento;
         //transform.position += (camF*positionInput.y + camR*positionInput.x)*Time.deltaTime;
     }
     // ------------------------------------------------------------------------

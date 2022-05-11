@@ -22,15 +22,7 @@ void setup()
   digitalWrite(3,0);
   digitalWrite(2,1);
 }
-int calib(int anRead){
-  if(anRead<minimum){
-    minimum = anRead;
-  }else if (maximum<anRead){
-    maximum = anRead;
-  }
-  return ( int)anRead*1023/(maximum - minimum);
-  
-}
+
 void controle(int intLeitura){
    if(intLeitura  >=48 and intLeitura <=57 and availab== true){
         if(intLeitura  >=49 and intLeitura <=57){
@@ -100,7 +92,7 @@ void loop()
      
     controle(red);
   }
-  Serial.println(calib(anaRead));
+  Serial.println(anaRead);
   delay(100);
 }
   
